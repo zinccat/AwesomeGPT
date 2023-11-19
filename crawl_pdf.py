@@ -1,7 +1,7 @@
 import requests
-import pandas as pd
 from tqdm import tqdm
 import concurrent.futures
+import os
 
 def download_file(url, filename):
     """Download file from a given URL and save it locally."""
@@ -15,16 +15,16 @@ def download_file(url, filename):
     except Exception as e:
         print(f"Error downloading {url}: {e}")
 
-def download_wrapper(paper_id, link):
-    url = link.replace('forum', 'pdf')
-    download_file(url, f'data/papers/{paper_id}.pdf')
+def download_wrapper(user, reponame, title, url):
+    # print(url)
+    download_file(url, f'data/pdf/{user}/{reponame}/{title}.pdf')
 
-df = pd.read_csv('data/paperlist_desk-rejected-withdrawn-submissions.tsv', sep='\t', index_col=0)
-# skip the first 1000 papers
-# df = df.iloc[1600:]
-# Adjust the max_workers according to your system's capability
-with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-    futures = [executor.submit(download_wrapper, paper_id, link) for paper_id, link in df.link.items()]
-    # Use tqdm to display progress
-    for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
-        pass
+def download_list(user, reponame, paper_list):
+    if not os.path.exists(f'data/pdf/{user}'):
+        os.makedirs(f'data/pdf/{user}/{reponame}')
+    # Adjust the max_workers according to your system's capability
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(download_wrapper, user, reponame, paper["title"], paper["pdf_link"]) for paper in paper_list]
+        # Use tqdm to display progress
+        for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
+            pass
