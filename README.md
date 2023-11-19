@@ -3,7 +3,7 @@ A GPT that makes you awesome!
 
 ## Todo
 
-1. Parse given awesome sites and extract arxiv links, turn into paper titles and pdf links
+1. Parse given awesome sites and extract arxiv links, turn into paper titles, abstracts and pdf links (crawl_awesome.py)
 2. Crawl pdf files (crawl_pdf.py)
 3. Parse pdf to text (parse_pdf.py)
 4. Encode text to vectors and store in database (ingest.py)
