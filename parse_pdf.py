@@ -5,6 +5,10 @@ import pypdf
 import re
 from typing import List
 
+import os
+import concurrent.futures
+from tqdm import tqdm
+
 def clean_article(text):
     # Splitting at 'Abstract' to remove title, author, and affiliation details
     sections = re.split(r'(?i)Abstract\n', text)
@@ -156,9 +160,48 @@ def process(text, outlines):
     text = "Abstract\n" + text
     return text
 
-if __name__ == "__main__":
-    pdf_path = "papers/7YfHla7IxBJ.pdf"
+def parse_pdf(pdf_path, output_dir, cache):
     data, outlines = extract_text_by_outline(pdf_path)
-    # print(outlines)
-    with open('papers/7YfHla7IxBJ.txt', 'w') as f:
-    f.write(process(data, outlines))
+    data = process(data, outlines)
+    if cache:
+        with open(os.path.join(output_dir, os.path.basename(pdf_path).replace('.pdf', '.txt')), 'w') as f:
+            f.write(data)
+    return data
+
+def process_pdfs(username, repo, cache=True):
+    input_dir = f'data/pdf/{username}/{repo}'
+    output_dir = f'data/txt/{username}/{repo}'
+    os.makedirs(output_dir, exist_ok=True)
+
+    pdf_paths = []
+    for root, dirs, files in os.walk(input_dir):
+        for file in files:
+            if file.endswith(".pdf"):
+                pdf_path = os.path.join(root, file)
+                pdf_paths.append(pdf_path)
+
+    papers_text = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        future_to_pdf = {executor.submit(parse_pdf, pdf_path, output_dir, cache): pdf_path for pdf_path in pdf_paths}
+        
+        # Initialize tqdm progress bar
+        with tqdm(total=len(pdf_paths), desc="Processing PDFs") as progress_bar:
+            for future in concurrent.futures.as_completed(future_to_pdf):
+                pdf_path = future_to_pdf[future]
+                try:
+                    data = future.result()
+                    papers_text[os.path.basename(pdf_path)] = data
+                except Exception as e:
+                    print(f"Exception occurred while processing file {pdf_path}: {e}")
+                finally:
+                    progress_bar.update(1)  # Update the progress bar for each completed future
+
+    return papers_text
+
+
+
+if __name__ == "__main__":
+    pdf_path = "data/pdf/AmadeusChan/Awesome-LLM-System-Papers/Blockwise Parallel Transformer for Large Context Models.pdf"
+    data = parse_pdf(pdf_path)
+    with open("data.txt", "w") as f:
+        f.write(data)
