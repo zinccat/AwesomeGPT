@@ -42,6 +42,8 @@ else:
         for file in files:
             if file.endswith(".txt"):
                 with open(os.path.join(root, file), 'r') as f:
-                    papers_text[file] = f.read()
+                    papers_text[file[:-4]] = f.read()
 
-# send to pinecone
+# output to json
+with open('llm.json', 'w') as f:
+    json.dump(papers_text, f)
