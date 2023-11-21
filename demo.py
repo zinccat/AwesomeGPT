@@ -38,10 +38,10 @@ def extract_github_repo(url):
 
 # Streamlit interface
 def main():
-    st.title("Awesome Repo Processor")
+    st.title("AwesomeGPT")
 
     # User input for GitHub repository
-    github_repo_url = st.text_input("Enter the GitHub repository URL:")
+    github_repo_url = st.text_input("Enter the GitHub repository URL:", placeholder='https://github.com/AmadeusChan/Awesome-LLM-System-Papers')
 
     if github_repo_url:
         ret = extract_github_repo(github_repo_url)
@@ -52,7 +52,7 @@ def main():
             st.success(f"Valid GitHub repository URL: {username}/{repo}")
             # Process the GitHub repository
             try:
-                with st.spinner("Processing..."):
+                with st.spinner("Processing... Please sit back and relax (will add some cute cat pics soon)"):
                     processed_data = process(username, repo)
                 st.success("Processing complete!")
                 # change dict to binary
