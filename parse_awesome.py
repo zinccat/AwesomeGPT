@@ -17,7 +17,7 @@ def get_readme_content(username, repo):
 
 def extract_arxiv_links(readme_content):
     # This regex will match both abstract and PDF links
-    print(readme_content)
+    # print(readme_content)
     arxiv_links = re.findall(r'https?://arxiv\.org/(?:abs|pdf)/[\w.-]+(?:v\d+)?', readme_content)
     # Normalize all links to abstract links
     normalized_links = [link.replace('/pdf/', '/abs/') for link in arxiv_links]
